@@ -4,6 +4,7 @@ import authRoutes from './authRoutes';
 import userRoutes from '../modules/user/user.routes';
 import studentRoutes from '../modules/student/student.routes';
 import { authorize } from '../middlewares/authorize';
+import { authenticate } from '../middlewares/authenticate';
 
 const router = Router();
 
@@ -18,6 +19,15 @@ router.get('/admin', authorize(['ADMIN']), (req: import('../middlewares/authoriz
   res.json({
     status: 200,
     message: 'Welcome to the admin dashboard!',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Example protected dashboard route
+router.get('/dashboard', authenticate, (req: import('../middlewares/authenticate').AuthenticatedRequest, res) => {
+  res.json({
+    status: 200,
+    message: 'Welcome to the dashboard!',
     timestamp: new Date().toISOString(),
   });
 });
