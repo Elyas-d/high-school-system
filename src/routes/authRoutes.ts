@@ -3,6 +3,8 @@ import passport from 'passport';
 import authController from '../controllers/auth.controller';
 import { authenticateToken } from '../middlewares/authMiddleware';
 import { requireAuth } from '../middlewares/roleMiddleware';
+import { validateDto } from '../common/middleware/validateDto';
+import { LoginDto } from '../modules/user/dto/LoginDto';
 
 const router = Router();
 
@@ -18,7 +20,7 @@ router.post('/register', authController.register);
  * @desc    Login user
  * @access  Public
  */
-router.post('/login', authController.login);
+router.post('/login', validateDto(LoginDto), authController.login);
 
 /**
  * @route   GET /auth/me
