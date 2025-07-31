@@ -4,11 +4,13 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from 'passport';
+import swaggerUi from 'swagger-ui-express';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import { requestLogger } from './middlewares/requestLogger';
 import routes from './routes';
 import logger from './utils/logger';
+import { specs } from './config/swagger';
 import './config/passport';
 
 // Load environment variables
@@ -25,6 +27,19 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use(requestLogger);
+
+// Swagger UI setup
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'High School Management System API Documentation',
+  customfavIcon: '/favicon.ico',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+    showExtensions: true,
+  },
+}));
 
 // Session middleware (required for Passport)
 app.use(session({
@@ -53,4 +68,5 @@ app.listen(PORT, () => {
   logger.info(`🚀 Server is running on port ${PORT}`);
   logger.info(`📝 Environment: ${process.env['NODE_ENV'] || 'development'}`);
   logger.info(`🌐 API available at http://localhost:${PORT}/api`);
+  logger.info(`📚 API Documentation available at http://localhost:${PORT}/api-docs`);
 }); 
