@@ -6,6 +6,7 @@ import session from 'express-session';
 import passport from 'passport';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
+import { requestLogger } from './middlewares/requestLogger';
 import routes from './routes';
 import './config/passport';
 
@@ -20,6 +21,9 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Request logging middleware
+app.use(requestLogger);
 
 // Session middleware (required for Passport)
 app.use(session({
