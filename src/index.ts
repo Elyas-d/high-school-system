@@ -5,8 +5,7 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 import passport from 'passport';
 import swaggerUi from 'swagger-ui-express';
-import { errorHandler } from './middlewares/errorHandler';
-import { notFoundHandler } from './middlewares/notFoundHandler';
+import { errorHandler, notFoundHandler } from './middlewares/errorHandler';
 import { requestLogger } from './middlewares/requestLogger';
 import routes from './routes';
 import logger from './utils/logger';
@@ -59,8 +58,10 @@ app.use(passport.session());
 // Routes
 app.use('/api', routes);
 
-// Error handling middleware
+// 404 handler for unmatched routes
 app.use(notFoundHandler);
+
+// Global error handling middleware (must be last)
 app.use(errorHandler);
 
 // Start server
