@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../utils/logger';
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -14,8 +15,8 @@ export const errorHandler = (
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 
-  // Log the error to console
-  console.error('Error:', {
+  // Log the error using winston
+  logger.error('Error:', {
     statusCode,
     message,
     stack: err.stack,
@@ -31,7 +32,7 @@ export const errorHandler = (
   };
 
   // Only include stack trace in development
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env['NODE_ENV'] === 'development') {
     errorResponse.stack = err.stack;
   }
 

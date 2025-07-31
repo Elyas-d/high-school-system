@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import { notFoundHandler } from './middlewares/notFoundHandler';
 import { requestLogger } from './middlewares/requestLogger';
 import routes from './routes';
+import logger from './utils/logger';
 import './config/passport';
 
 // Load environment variables
@@ -49,6 +50,7 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env['NODE_ENV']}`);
+  logger.info(`🚀 Server is running on port ${PORT}`);
+  logger.info(`📝 Environment: ${process.env['NODE_ENV'] || 'development'}`);
+  logger.info(`🌐 API available at http://localhost:${PORT}/api`);
 }); 
