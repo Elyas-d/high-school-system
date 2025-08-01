@@ -12,25 +12,25 @@ export class GradeController {
   }
 
   async fetchByClass(req: Request, res: Response) {
-    const classId = req.params.classId;
+    const classId = req.params.classId as string;
     const result = await gradeService.fetchByClass(classId);
     return res.json(result);
   }
 
   async fetchByStudent(req: Request, res: Response) {
-    const studentId = req.params.studentId;
+    const studentId = req.params.studentId as string;
     const result = await gradeService.fetchByStudent(studentId);
     return res.json(result);
   }
 
   async fetchBySubject(req: Request, res: Response) {
-    const subjectId = req.params.subjectId;
+    const subjectId = req.params.subjectId as string;
     const result = await gradeService.fetchBySubject(subjectId);
     return res.json(result);
   }
 
   async updateGrade(req: Request, res: Response) {
-    const gradeId = req.params.id;
+    const gradeId = req.params.id as string;
     const dto: UpdateGradeDTO = req.body;
     const result = await gradeService.updateGrade(gradeId, dto);
     return res.json(result);

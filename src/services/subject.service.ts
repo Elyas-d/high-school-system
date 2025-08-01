@@ -44,4 +44,15 @@ export class SubjectService {
     });
     return { success: true, subject };
   }
-} 
+
+  // List all subjects
+  async listAll() {
+    return prisma.subject.findMany({
+      include: {
+        gradeLevel: true,
+      },
+    });
+  }
+}
+
+export default new SubjectService(); 

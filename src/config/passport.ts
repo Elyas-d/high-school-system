@@ -9,8 +9,9 @@ passport.use(
       clientID: process.env['GOOGLE_CLIENT_ID'] || '',
       clientSecret: process.env['GOOGLE_CLIENT_SECRET'] || '',
       callbackURL: process.env['GOOGLE_CALLBACK_URL'] || 'http://localhost:3001/auth/google/callback',
+      passReqToCallback: true,
     },
-    async (accessToken: string, refreshToken: string, profile: GoogleProfile, done: any) => {
+    async (_req: any, _accessToken: string, _refreshToken: string, _params: any, profile: any, done: any) => {
       try {
         // Pass the profile to the callback
         return done(null, profile);

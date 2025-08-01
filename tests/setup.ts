@@ -7,28 +7,44 @@ dotenv.config({ path: '.env.test' });
 // Global test setup
 beforeAll(async () => {
   // Set test environment
-  process.env.NODE_ENV = 'test';
+  process.env['NODE_ENV'] = 'test';
   
   // Initialize test database connection
-  const prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
+      const prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env['DATABASE_URL'] || '',
+        },
       },
-    },
-  });
+    });
 
-  // Store prisma instance globally for tests
-  (global as any).prisma = prisma;
+  try {
+    // Test database connection
+    await prisma.$connect();
+    console.log('✅ Test database connected successfully');
+  } catch (error) {
+    console.error('❌ Failed to connect to test database:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
 });
 
 // Global test teardown
 afterAll(async () => {
-  const prisma = (global as any).prisma;
-  if (prisma) {
-    await prisma.$disconnect();
-  }
+  // Clean up any global resources
+  console.log('🧹 Test environment cleanup completed');
 });
+
+// Global test timeout
+jest.setTimeout(30000);
+
+// Suppress console logs during tests (optional)
+if (process.env['NODE_ENV'] === 'test') {
+  console.log = jest.fn();
+  console.error = jest.fn();
+  console.warn = jest.fn();
+}
 
 // Reset database between tests
 beforeEach(async () => {

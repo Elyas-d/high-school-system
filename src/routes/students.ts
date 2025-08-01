@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { StudentController } from '../controllers/student.controller';
+import { StudentController } from '../modules/student/student.controller';
 import { authenticate } from '../common/middleware/authenticate';
 import { authorize } from '../common/middleware/authorize';
 import { UserRole } from '@prisma/client';

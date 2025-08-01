@@ -2,7 +2,7 @@ import { Router } from 'express';
 import passport from 'passport';
 import authController from '../controllers/auth.controller';
 import { authenticateToken } from '../middlewares/authMiddleware';
-import { requireAuth } from '../middlewares/roleMiddleware';
+
 import { validateDto } from '../common/middleware/validateDto';
 import { LoginDto } from '../modules/user/dto/LoginDto';
 
@@ -240,7 +240,7 @@ router.post('/refresh', authController.refreshToken);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/logout', requireAuth, authController.logout);
+router.post('/logout', authenticateToken, authController.logout);
 
 /**
  * @swagger

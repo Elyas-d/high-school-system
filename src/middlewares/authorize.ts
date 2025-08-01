@@ -1,31 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+// Thin wrapper that forwards to the strongly-typed authorize in common middleware,
+// while still allowing routes that pass string role names to compile.
+import { UserRole } from '@prisma/client';
+import { authorize as baseAuthorize } from '../common/middleware/authorize';
 
-// Define the expected shape of req.user
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-    [key: string]: any;
-  } | undefined;
-}
+export const authorize = (roles: (UserRole | string)[]) => {
+  const allowed = roles.map((r) => (typeof r === 'string' ? (r as UserRole) : r));
+  return baseAuthorize(allowed as UserRole[]);
+};
 
-export function authorize(allowedRoles: string[]) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const user = req.user;
-    if (!user || !user.role) {
-      return res.status(401).json({
-        status: 401,
-        message: 'Unauthorized: User not authenticated',
-        timestamp: new Date().toISOString(),
-      });
-    }
-    if (!allowedRoles.includes(user.role)) {
-      return res.status(403).json({
-        status: 403,
-        message: `Forbidden: User role '${user.role}' is not allowed to access this resource`,
-        timestamp: new Date().toISOString(),
-      });
-    }
-    next();
-  };
-} 
+export default authorize; 

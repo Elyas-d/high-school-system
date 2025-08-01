@@ -35,13 +35,35 @@ export class UserController {
     }
   }
 
+  // --- Aliases used in routes ---
+  // list -> getAllUsers
+  async list(req: Request, res: Response) {
+    return this.getAllUsers(req, res);
+  }
+
+  async getById(req: Request, res: Response) {
+    return this.getUserById(req, res);
+  }
+
+  async create(req: Request, res: Response) {
+    return this.createUser(req, res);
+  }
+
+  async update(req: Request, res: Response) {
+    return this.updateUser(req, res);
+  }
+
+  async delete(req: Request, res: Response) {
+    return this.deleteUser(req, res);
+  }
+
   /**
    * Get user by ID
    * GET /users/:id
    */
   async getUserById(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const user = await userService.getUserById(id);
 
@@ -129,7 +151,7 @@ export class UserController {
    */
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const updateData: UpdateUserData = req.body;
 
       // Validate email format if provided
@@ -178,7 +200,7 @@ export class UserController {
    */
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       await userService.deleteUser(id);
 

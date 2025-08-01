@@ -3,11 +3,7 @@ import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../types/auth.types';
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    userId: string;
-    email: string;
-    role: string;
-  };
+  user?: any;
 }
 
 /**

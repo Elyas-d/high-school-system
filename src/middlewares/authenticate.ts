@@ -6,7 +6,7 @@ export interface AuthenticatedRequest extends Request {
   user?: any;
 }
 
-export function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction): Response | void {
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
@@ -16,7 +16,7 @@ export function authenticate(req: AuthenticatedRequest, res: Response, next: Nex
     });
   }
   const token = authHeader.split(' ')[1];
-  const secret = process.env['JWT_SECRET'];
+  const secret = process.env['JWT_SECRET'] as string | undefined;
   if (!secret) {
     return res.status(500).json({
       status: 500,
@@ -25,7 +25,7 @@ export function authenticate(req: AuthenticatedRequest, res: Response, next: Nex
     });
   }
   try {
-    const payload = jwt.verify(token, secret);
+    const payload = jwt.verify(token, secret as jwt.Secret);
     if (
       typeof payload === 'object' &&
       payload !== null &&
@@ -48,4 +48,9 @@ export function authenticate(req: AuthenticatedRequest, res: Response, next: Nex
       timestamp: new Date().toISOString(),
     });
   }
-} 
+  // fallback
+  return;
+}
+
+// Alias for backward compatibility
+export { authenticate as isAuthenticated }; 

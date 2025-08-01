@@ -12,7 +12,7 @@ export class TeacherController {
   }
 
   async listAssignedClasses(req: Request, res: Response) {
-    const teacherId = req.params.id;
+    const teacherId = req.params.id as string;
     const result = await teacherService.listAssignedClasses(teacherId);
     return res.json(result);
   }
@@ -24,21 +24,27 @@ export class TeacherController {
   }
 
   async read(req: Request, res: Response) {
-    const teacherId = req.params.id;
+    const teacherId = req.params.id as string;
     const result = await teacherService.read(teacherId);
     return res.json(result);
   }
 
   async update(req: Request, res: Response) {
-    const teacherId = req.params.id;
+    const teacherId = req.params.id as string;
     const dto: UpdateTeacherDTO = req.body;
     const result = await teacherService.update(teacherId, dto);
     return res.json(result);
   }
 
   async delete(req: Request, res: Response) {
-    const teacherId = req.params.id;
+    const teacherId = req.params.id as string;
     await teacherService.delete(teacherId);
     return res.status(204).send();
+  }
+
+  // List all teachers
+  async list(_req: Request, res: Response) {
+    const result = await teacherService.list();
+    return res.json(result);
   }
 } 

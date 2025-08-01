@@ -71,6 +71,6 @@ export interface AuthResponse {
 // Token response interface
 export interface TokenResponse {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken: string;
   expiresIn: number;
 } 

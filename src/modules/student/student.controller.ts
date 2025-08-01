@@ -36,13 +36,39 @@ export class StudentController {
     }
   }
 
+  // --- Aliases to satisfy routes ---
+  async listAll(req: Request, res: Response) {
+    return this.getAllStudents(req, res);
+  }
+
+  async getById(req: Request, res: Response) {
+    return this.getStudentById(req, res);
+  }
+
+  async create(req: Request, res: Response) {
+    return this.createStudent(req, res);
+  }
+
+  async update(req: Request, res: Response) {
+    return this.updateStudent(req, res);
+  }
+
+  async delete(req: Request, res: Response) {
+    return this.deleteStudent(req, res);
+  }
+
+  async assignParent(req: Request, res: Response) {
+    // placeholder implementation
+    res.status(501).json({ success: false, message: 'assignParent not implemented' });
+  }
+
   /**
    * Get student by ID
    * GET /students/:id
    */
   async getStudentById(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const student = await studentService.getStudentById(id);
 
@@ -125,7 +151,7 @@ export class StudentController {
    */
   async updateStudent(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const updateData: UpdateStudentData = req.body;
 
       const student = await studentService.updateStudent(id, updateData);
@@ -162,7 +188,7 @@ export class StudentController {
    */
   async deleteStudent(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       await studentService.deleteStudent(id);
 
@@ -192,7 +218,7 @@ export class StudentController {
    */
   async getStudentsByGradeLevel(req: Request, res: Response): Promise<void> {
     try {
-      const { gradeLevelId } = req.params;
+      const gradeLevelId = req.params.gradeLevelId as string;
       const { page, limit, search } = req.query;
 
       const options: PaginationOptions = {
@@ -224,7 +250,7 @@ export class StudentController {
    */
   async getStudentsByClass(req: Request, res: Response): Promise<void> {
     try {
-      const { classId } = req.params;
+      const classId = req.params.classId as string;
       const { page, limit, search } = req.query;
 
       const options: PaginationOptions = {

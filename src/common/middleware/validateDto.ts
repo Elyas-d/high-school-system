@@ -3,7 +3,7 @@ import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
 export function validateDto(dtoClass: any) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
       // Transform plain object to class instance
       const dtoObject = plainToClass(dtoClass, req.body);

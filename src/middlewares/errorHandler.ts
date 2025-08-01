@@ -61,20 +61,21 @@ export const errorHandler = (
   }
 
   // Handle duplicate key errors (MongoDB/PostgreSQL)
-  if (err.code === 'P2002' || err.code === 11000) {
+  const code = (err as any).code;
+  if (code === 'P2002' || code === 11000) {
     const meta = (err as any).meta;
-    const target = meta?.['target'] as string[] | undefined;
-    const field = target?.[0] || 'field';
+    const target = meta?.target as string[] | undefined;
+    const field = target && target.length ? target[0] : 'field';
     error = AppError.conflict(`${field} already exists`, 'DUPLICATE_FIELD', { field });
   }
 
   // Handle foreign key constraint errors
-  if (err.code === 'P2003') {
+  if (code === 'P2003') {
     error = AppError.badRequest('Referenced record does not exist', 'FOREIGN_KEY_CONSTRAINT');
   }
 
   // Handle record not found errors
-  if (err.code === 'P2025') {
+  if (code === 'P2025') {
     error = AppError.notFound('Record not found', 'RECORD_NOT_FOUND');
   }
 
@@ -118,7 +119,7 @@ export const errorHandler = (
 function handlePrismaError(err: Prisma.PrismaClientKnownRequestError): AppError {
   switch (err.code) {
     case 'P2002':
-      const field = err.meta?.target?.[0] || 'field';
+      const field = (err.meta as any)?.target?.[0] ?? 'field';
       return AppError.conflict(`${field} already exists`, 'DUPLICATE_FIELD', { field });
     
     case 'P2003':

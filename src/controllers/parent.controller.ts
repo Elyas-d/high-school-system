@@ -12,13 +12,13 @@ export class ParentController {
   }
 
   async viewChildGrades(req: Request, res: Response) {
-    const parentId = req.params.id;
+    const parentId = req.params.id as string;
     const result = await parentService.viewChildGrades(parentId);
     return res.json(result);
   }
 
   async viewChildAttendance(req: Request, res: Response) {
-    const parentId = req.params.id;
+    const parentId = req.params.id as string;
     const result = await parentService.viewChildAttendance(parentId);
     return res.json(result);
   }

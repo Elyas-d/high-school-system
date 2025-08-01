@@ -70,4 +70,19 @@ export class ClassService {
     if (!classObj) throw new Error('Class not found');
     return classObj;
   }
-} 
+
+  // List all classes with basic relations
+  async listAll() {
+    return prisma.class.findMany({
+      include: {
+        subject: true,
+        teacher: {
+          include: { user: true },
+        },
+        _count: { select: { students: true } },
+      },
+    });
+  }
+}
+
+export default new ClassService(); 

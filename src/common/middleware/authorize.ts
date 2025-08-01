@@ -1,12 +1,13 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { UserRole } from '@prisma/client';
 import { AuthenticatedRequest } from './authenticate';
 
 export const authorize = (allowedRoles: UserRole[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): Response | void => {
     try {
       // Check if user is authenticated
-      if (!req.user) {
+      const userReq = req as AuthenticatedRequest;
+      if (!userReq.user) {
         return res.status(401).json({
           statusCode: 401,
           message: 'Authentication required',
@@ -14,10 +15,10 @@ export const authorize = (allowedRoles: UserRole[]) => {
       }
 
       // Check if user's role is in allowed roles
-      if (!allowedRoles.includes(req.user.role)) {
+      if (!allowedRoles.includes(userReq.user.role)) {
         return res.status(403).json({
           statusCode: 403,
-          message: `Access denied. Required roles: ${allowedRoles.join(', ')}. Your role: ${req.user.role}`,
+          message: `Access denied. Required roles: ${allowedRoles.join(', ')}. Your role: ${userReq.user.role}`,
         });
       }
 

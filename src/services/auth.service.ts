@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Request } from 'express';
 import prisma from '../config/database';
 import { UserRole } from '@prisma/client';
 import {
@@ -13,7 +12,7 @@ import {
 } from '../types/auth.types';
 
 export class AuthService {
-  private readonly JWT_SECRET: string;
+  private readonly JWT_SECRET: jwt.Secret;
   private readonly JWT_EXPIRES_IN: string;
   private readonly REFRESH_TOKEN_EXPIRES_IN: string;
 
@@ -247,13 +246,13 @@ export class AuthService {
       role,
     };
 
-    const accessToken = jwt.sign(payload, this.JWT_SECRET as jwt.Secret, {
+    const accessToken = jwt.sign(payload, this.JWT_SECRET, {
       expiresIn: this.JWT_EXPIRES_IN,
-    });
+    } as jwt.SignOptions);
 
-    const refreshToken = jwt.sign(payload, this.JWT_SECRET as jwt.Secret, {
+    const refreshToken = jwt.sign(payload, this.JWT_SECRET, {
       expiresIn: this.REFRESH_TOKEN_EXPIRES_IN,
-    });
+    } as jwt.SignOptions);
 
     return {
       accessToken,

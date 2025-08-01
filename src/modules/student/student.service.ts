@@ -492,13 +492,6 @@ export class StudentService {
         _count: {
           gradeLevelId: true,
         },
-        include: {
-          gradeLevel: {
-            select: {
-              name: true,
-            },
-          },
-        },
       }),
       prisma.student.groupBy({
         by: ['classId'],
@@ -514,7 +507,7 @@ export class StudentService {
     ]);
 
     const gradeLevelCounts = gradeLevelStats.reduce((acc, stat) => {
-      acc[stat.gradeLevel.name] = stat._count.gradeLevelId;
+      acc[stat.gradeLevelId] = stat._count.gradeLevelId;
       return acc;
     }, {} as Record<string, number>);
 

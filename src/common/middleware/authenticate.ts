@@ -12,10 +12,10 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authenticate = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Response | void => {
   try {
     // Extract token from Authorization header
     const authHeader = req.headers.authorization;
@@ -30,7 +30,7 @@ export const authenticate = (
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
     // Verify token
-    const secret = process.env.JWT_SECRET;
+    const secret = process.env['JWT_SECRET'] as string | undefined;
     if (!secret) {
       console.error('JWT_SECRET not configured');
       return res.status(500).json({
@@ -39,14 +39,14 @@ export const authenticate = (
       });
     }
 
-    const decoded = jwt.verify(token, secret) as {
+    const decoded = jwt.verify(token, secret as jwt.Secret) as {
       id: string;
       role: UserRole;
       email: string;
     };
 
     // Attach user info to request
-    req.user = {
+    (req as AuthenticatedRequest).user = {
       id: decoded.id,
       role: decoded.role,
       email: decoded.email,
@@ -74,4 +74,7 @@ export const authenticate = (
       message: 'Authentication failed',
     });
   }
-}; 
+};
+
+// Alias for routes that import isAuthenticated
+export { authenticate as isAuthenticated }; 

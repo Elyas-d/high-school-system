@@ -12,20 +12,20 @@ export class ClassController {
   }
 
   async read(req: Request, res: Response) {
-    const classId = req.params.id;
+    const classId = req.params.id as string;
     const result = await classService.read(classId);
     return res.json(result);
   }
 
   async update(req: Request, res: Response) {
-    const classId = req.params.id;
+    const classId = req.params.id as string;
     const dto: UpdateClassDTO = req.body;
     const result = await classService.update(classId, dto);
     return res.json(result);
   }
 
   async delete(req: Request, res: Response) {
-    const classId = req.params.id;
+    const classId = req.params.id as string;
     await classService.delete(classId);
     return res.status(204).send();
   }
@@ -43,8 +43,14 @@ export class ClassController {
   }
 
   async getSchedule(req: Request, res: Response) {
-    const classId = req.params.id;
+    const classId = req.params.id as string;
     const result = await classService.getSchedule(classId);
+    return res.json(result);
+  }
+
+  // List all classes
+  async listAll(_req: Request, res: Response) {
+    const result = await classService.listAll();
     return res.json(result);
   }
 } 

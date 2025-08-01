@@ -18,9 +18,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:auth": "jest tests/auth/",
-    "test:user": "jest tests/user/",
-    "test:student": "jest tests/student/"
+    "test:e2e": "jest --testPathPatterns=tests/.*\\.e2e\\.test\\.ts",
+    "test:e2e:watch": "jest --config jest.config.js --testPathPattern=tests/.*\\.e2e\\.test\\.ts --watch",
+    "test:auth": "jest tests/auth.e2e.test.ts",
+    "test:students": "jest tests/students.e2e.test.ts",
+    "test:unit": "jest --testPathIgnorePatterns=tests/.*\\.e2e\\.test\\.ts"
   },
   "keywords": [
     "express",

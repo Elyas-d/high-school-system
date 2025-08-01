@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { UserController } from '../controllers/user.controller';
+import { UserController } from '../modules/user/user.controller';
 import { authenticate } from '../common/middleware/authenticate';
 import { authorize } from '../common/middleware/authorize';
 import { validateDto } from '../common/middleware/validateDto';

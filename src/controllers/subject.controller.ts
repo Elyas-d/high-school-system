@@ -12,20 +12,20 @@ export class SubjectController {
   }
 
   async read(req: Request, res: Response) {
-    const subjectId = req.params.id;
+    const subjectId = req.params.id as string;
     const result = await subjectService.read(subjectId);
     return res.json(result);
   }
 
   async update(req: Request, res: Response) {
-    const subjectId = req.params.id;
+    const subjectId = req.params.id as string;
     const dto: UpdateSubjectDTO = req.body;
     const result = await subjectService.update(subjectId, dto);
     return res.json(result);
   }
 
   async delete(req: Request, res: Response) {
-    const subjectId = req.params.id;
+    const subjectId = req.params.id as string;
     await subjectService.delete(subjectId);
     return res.status(204).send();
   }
@@ -33,6 +33,12 @@ export class SubjectController {
   async assignToGradeLevel(req: Request, res: Response) {
     const dto: AssignToGradeLevelDTO = req.body;
     const result = await subjectService.assignToGradeLevel(dto);
+    return res.json(result);
+  }
+
+  // List subjects
+  async listAll(_req: Request, res: Response) {
+    const result = await subjectService.listAll();
     return res.json(result);
   }
 } 

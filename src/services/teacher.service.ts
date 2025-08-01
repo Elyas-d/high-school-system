@@ -8,7 +8,7 @@ export class TeacherService {
   async assignSubjectsAndClasses(dto: AssignSubjectsAndClassesDTO) {
     // Assign subjects: update teacher's classes and subjects
     // For simplicity, assign classes (subjects are linked via class.subjectId)
-    const teacher = await prisma.teacher.update({
+    const _teacher = await prisma.teacher.update({
       where: { id: dto.teacherId },
       data: {
         classes: {
@@ -86,4 +86,16 @@ export class TeacherService {
     await prisma.user.delete({ where: { id: teacher.userId } });
     return;
   }
-} 
+
+  // List all teachers with basic user info
+  async list() {
+    return prisma.teacher.findMany({
+      include: {
+        user: true,
+        classes: true,
+      },
+    });
+  }
+}
+
+export default new TeacherService(); 
