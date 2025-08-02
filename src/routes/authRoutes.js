@@ -1,21 +1,7 @@
 const { Router } = require('express');
 const passport = require('passport');
-
-// Placeholder auth controller
-const authController = {
-  register: (req, res) => {
-    res.json({ message: 'Register endpoint (placeholder)' });
-  },
-  login: (req, res) => {
-    res.json({ message: 'Login endpoint (placeholder)' });
-  },
-  logout: (req, res) => {
-    res.json({ message: 'Logout endpoint (placeholder)' });
-  },
-  profile: (req, res) => {
-    res.json({ message: 'Profile endpoint (placeholder)', user: req.user });
-  }
-};
+const authController = require('../controllers/authController');
+const { authenticate } = require('../middlewares/authenticate');
 
 const router = Router();
 
@@ -23,6 +9,7 @@ const router = Router();
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
-router.get('/profile', authController.profile);
+router.get('/profile', authenticate, authController.profile);
+router.post('/refresh', authController.refreshToken);
 
 module.exports = router; 

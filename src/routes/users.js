@@ -1,15 +1,7 @@
 const { Router } = require('express');
 const { authenticate } = require('../middlewares/authenticate');
 const { authorize } = require('../middlewares/authorize');
-
-// Placeholder user controller
-const userController = {
-  list: (req, res) => res.json({ message: 'List users (admin only)' }),
-  getById: (req, res) => res.json({ message: 'Get user by ID', id: req.params.id }),
-  create: (req, res) => res.json({ message: 'Create user (admin only)' }),
-  update: (req, res) => res.json({ message: 'Update user (admin only)', id: req.params.id }),
-  delete: (req, res) => res.json({ message: 'Delete user (admin only)', id: req.params.id })
-};
+const userController = require('../controllers/userController');
 
 const router = Router();
 
@@ -26,11 +18,6 @@ router.put('/:id', authenticate, authorize(['ADMIN']), userController.update);
 router.delete('/:id', authenticate, authorize(['ADMIN']), userController.delete);
 
 // User profile route - authenticated users can access their own profile
-router.get('/me', authenticate, (req, res) => {
-  res.json({ 
-    message: 'User profile', 
-    user: req.user 
-  });
-});
+router.get('/me', authenticate, userController.getCurrentUser);
 
 module.exports = router; 
