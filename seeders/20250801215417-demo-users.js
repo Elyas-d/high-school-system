@@ -1,0 +1,220 @@
+'use strict';
+const bcrypt = require('bcryptjs');
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up (queryInterface, Sequelize) {
+    // Hash passwords
+    const passwordHashes = {
+      admin: await bcrypt.hash('admin123', 10),
+      teacher: await bcrypt.hash('teacher123', 10),
+      parent: await bcrypt.hash('parent123', 10),
+      student: await bcrypt.hash('student123', 10),
+    };
+
+    // 1. Create Users
+    await queryInterface.bulkInsert('Users', [
+      {
+        firstName: 'Admin',
+        lastName: 'Staff',
+        email: 'admin@example.com',
+        password: passwordHashes.admin,
+        role: 'STAFF',
+        phoneNumber: '1000000000',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        firstName: 'John',
+        lastName: 'Teacher',
+        email: 'teacher1@example.com',
+        password: passwordHashes.teacher,
+        role: 'TEACHER',
+        phoneNumber: '2000000000',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        firstName: 'Mary',
+        lastName: 'Parent',
+        email: 'parent1@example.com',
+        password: passwordHashes.parent,
+        role: 'PARENT',
+        phoneNumber: '3000000000',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        firstName: 'Jane',
+        lastName: 'Student',
+        email: 'student1@example.com',
+        password: passwordHashes.student,
+        role: 'STUDENT',
+        phoneNumber: '4000000000',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    // Get the created users
+    const users = await queryInterface.sequelize.query(
+      'SELECT id FROM Users WHERE email IN (?, ?, ?, ?)',
+      {
+        replacements: ['admin@example.com', 'teacher1@example.com', 'parent1@example.com', 'student1@example.com'],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    // 2. Create GradeLevel
+    await queryInterface.bulkInsert('GradeLevels', [
+      {
+        name: 'Grade 9',
+        description: 'Ninth grade',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    // Get the created grade level
+    const gradeLevel = await queryInterface.sequelize.query(
+      'SELECT id FROM GradeLevels WHERE name = ?',
+      {
+        replacements: ['Grade 9'],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    // 3. Create Subjects
+    await queryInterface.bulkInsert('Subjects', [
+      {
+        name: 'Mathematics',
+        description: 'Math subject',
+        gradeLevelId: gradeLevel[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        name: 'English',
+        description: 'English subject',
+        gradeLevelId: gradeLevel[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    // Get the created subjects
+    const subjects = await queryInterface.sequelize.query(
+      'SELECT id FROM Subjects WHERE name IN (?, ?)',
+      {
+        replacements: ['Mathematics', 'English'],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    // 4. Create Staff, Teacher, Parent, Student entries
+    await queryInterface.bulkInsert('Staffs', [
+      {
+        userId: users[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    await queryInterface.bulkInsert('Teachers', [
+      {
+        userId: users[1].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    await queryInterface.bulkInsert('Parents', [
+      {
+        userId: users[2].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    // Get the created teacher and parent
+    const teachers = await queryInterface.sequelize.query(
+      'SELECT id FROM Teachers WHERE userId = ?',
+      {
+        replacements: [users[1].id],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    const parents = await queryInterface.sequelize.query(
+      'SELECT id FROM Parents WHERE userId = ?',
+      {
+        replacements: [users[2].id],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    // 5. Create Class
+    await queryInterface.bulkInsert('Classes', [
+      {
+        subjectId: subjects[0].id,
+        teacherId: teachers[0].id,
+        schedule: 'Mon-Fri 8:00-9:00',
+        roomNumber: '101',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    // Get the created class
+    const classes = await queryInterface.sequelize.query(
+      'SELECT id FROM Classes WHERE roomNumber = ?',
+      {
+        replacements: ['101'],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    // 6. Create Student
+    await queryInterface.bulkInsert('Students', [
+      {
+        userId: users[3].id,
+        gradeLevelId: gradeLevel[0].id,
+        classId: classes[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+
+    // Get the created student
+    const students = await queryInterface.sequelize.query(
+      'SELECT id FROM Students WHERE userId = ?',
+      {
+        replacements: [users[3].id],
+        type: Sequelize.QueryTypes.SELECT
+      }
+    );
+
+    // 7. Link Parent to Student (ParentStudent join table)
+    await queryInterface.bulkInsert('ParentStudents', [
+      {
+        parentId: parents[0].id,
+        studentId: students[0].id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ]);
+  },
+
+  async down (queryInterface, Sequelize) {
+    // Remove data in reverse order
+    await queryInterface.bulkDelete('ParentStudents', null, {});
+    await queryInterface.bulkDelete('Students', null, {});
+    await queryInterface.bulkDelete('Classes', null, {});
+    await queryInterface.bulkDelete('Parents', null, {});
+    await queryInterface.bulkDelete('Teachers', null, {});
+    await queryInterface.bulkDelete('Staffs', null, {});
+    await queryInterface.bulkDelete('Subjects', null, {});
+    await queryInterface.bulkDelete('GradeLevels', null, {});
+    await queryInterface.bulkDelete('Users', null, {});
+  }
+};
