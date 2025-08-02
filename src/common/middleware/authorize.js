@@ -1,9 +1,5 @@
-import { Response, NextFunction } from 'express';
-import { UserRole } from '@prisma/client';
-import { AuthenticatedRequest } from './authenticate';
-
-export const authorize = (allowedRoles: UserRole[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authorize = (allowedRoles) => {
+  return (req, res, next) => {
     try {
       // Check if user is authenticated
       if (!req.user) {
@@ -31,4 +27,6 @@ export const authorize = (allowedRoles: UserRole[]) => {
       });
     }
   };
-}; 
+};
+
+module.exports = authorize;

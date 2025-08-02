@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+const dotenv = require('dotenv');
+const { PrismaClient } = require('@prisma/client');
 
 // Load test environment variables
 dotenv.config({ path: '.env.test' });
@@ -8,7 +8,7 @@ dotenv.config({ path: '.env.test' });
 beforeAll(async () => {
   // Set test environment
   process.env.NODE_ENV = 'test';
-  
+
   // Initialize test database connection
   const prisma = new PrismaClient({
     datasources: {
@@ -19,12 +19,12 @@ beforeAll(async () => {
   });
 
   // Store prisma instance globally for tests
-  (global as any).prisma = prisma;
+  global.prisma = prisma;
 });
 
 // Global test teardown
 afterAll(async () => {
-  const prisma = (global as any).prisma;
+  const prisma = global.prisma;
   if (prisma) {
     await prisma.$disconnect();
   }
@@ -32,7 +32,7 @@ afterAll(async () => {
 
 // Reset database between tests
 beforeEach(async () => {
-  const prisma = (global as any).prisma;
+  const prisma = global.prisma;
   if (prisma) {
     // Clean up all tables in reverse order of dependencies
     await prisma.payment.deleteMany();
@@ -52,4 +52,4 @@ beforeEach(async () => {
     await prisma.gradeLevel.deleteMany();
     await prisma.user.deleteMany();
   }
-}); 
+});
