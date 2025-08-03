@@ -13,11 +13,12 @@ module.exports = (sequelize, DataTypes) => {
       // Belongs to User
       Parent.belongsTo(models.User, { foreignKey: 'userId' });
       
-      // Many-to-many with Student (through ParentStudent join table)
+      // Many-to-many with Student (through ParentStudents join table)
       Parent.belongsToMany(models.Student, { 
-        through: 'ParentStudent',
+        through: 'ParentStudents',
         foreignKey: 'parentId',
-        otherKey: 'studentId'
+        otherKey: 'studentId',
+        as: 'Students'
       });
     }
   }
