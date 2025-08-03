@@ -8,8 +8,8 @@ const router = Router();
 // Auth routes
 router.post('/register', authController.register);
 router.post('/login', authController.login);
-router.post('/logout', authController.logout);
+router.post('/logout', authenticate, authController.logout); // Now requires authentication to blacklist token
 router.get('/profile', authenticate, authController.profile);
 router.post('/refresh', authController.refreshToken);
 
-module.exports = router; 
+module.exports = router;

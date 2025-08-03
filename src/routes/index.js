@@ -7,6 +7,7 @@ const parentRoutes = require('./parents');
 const classRoutes = require('./classes');
 const gradeRoutes = require('./grades');
 const subjectRoutes = require('./subjects');
+const tokenRoutes = require('./tokens');
 const exampleRoutes = require('./example');
 const materialsRoutes = require('./materials');
 
@@ -21,7 +22,8 @@ router.use('/parents', parentRoutes);
 router.use('/classes', classRoutes);
 router.use('/grades', gradeRoutes);
 router.use('/subjects', subjectRoutes);
+router.use('/tokens', tokenRoutes);
 router.use('/example', exampleRoutes);
 router.use('/materials', materialsRoutes);
 
-module.exports = router; 
+module.exports = router;

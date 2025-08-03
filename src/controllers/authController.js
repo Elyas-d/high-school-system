@@ -257,15 +257,35 @@ class AuthController {
    */
   async logout(req, res) {
     try {
-      // In a stateless JWT system, logout is handled client-side
-      // by removing the token from storage
-      // Optionally, you could implement a blacklist for tokens
+      const token = req.token; // Token is attached by authenticate middleware
       
-      res.status(200).json({
-        success: true,
-        message: 'Logged out successfully',
-        timestamp: new Date().toISOString()
-      });
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'No token provided for logout',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // Import token blacklist service
+      const tokenBlacklistService = require('../services/tokenBlacklistService');
+      
+      // Add token to blacklist
+      const blacklisted = tokenBlacklistService.blacklistToken(token);
+      
+      if (blacklisted) {
+        res.status(200).json({
+          success: true,
+          message: 'Logged out successfully - token has been revoked',
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to revoke token',
+          timestamp: new Date().toISOString()
+        });
+      }
 
     } catch (error) {
       console.error('Logout error:', error);
