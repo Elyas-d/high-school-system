@@ -3,7 +3,7 @@
   "info": {
     "title": "High School Management System API",
     "version": "1.0.0",
-    "description": "API documentation for the High School Management System"
+    "description": "A comprehensive API for managing high school operations including students, teachers, classes, grades, and more."
   },
   "servers": [
     {
@@ -20,6 +20,677 @@
       }
     },
     "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the user"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "User's first name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "User's last name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "TEACHER",
+              "STUDENT",
+              "PARENT",
+              "STAFF"
+            ],
+            "description": "User's role in the system"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "User's phone number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "User creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "User last update timestamp"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/User"
+              },
+              "token": {
+                "type": "string",
+                "description": "JWT access token"
+              }
+            }
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@highschool.edu"
+          },
+          "password": {
+            "type": "string",
+            "example": "admin123"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "password",
+          "role"
+        ],
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "password123"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "STAFF",
+              "TEACHER",
+              "STUDENT",
+              "PARENT"
+            ],
+            "example": "STUDENT"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": 1234567890
+          }
+        }
+      },
+      "RefreshTokenRequest": {
+        "type": "object",
+        "required": [
+          "refreshToken"
+        ],
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "JWT refresh token"
+          }
+        }
+      },
+      "CreateGradeRequest": {
+        "type": "object",
+        "required": [
+          "studentId",
+          "subjectId",
+          "gradeValue"
+        ],
+        "properties": {
+          "studentId": {
+            "type": "integer",
+            "description": "ID of the student receiving the grade"
+          },
+          "subjectId": {
+            "type": "integer",
+            "description": "ID of the subject for the grade"
+          },
+          "classId": {
+            "type": "integer",
+            "description": "ID of the class (optional)"
+          },
+          "gradeValue": {
+            "type": "number",
+            "format": "decimal",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Grade value (0-100 or 0-maxPoints)"
+          },
+          "gradeType": {
+            "type": "string",
+            "enum": [
+              "EXAM",
+              "QUIZ",
+              "ASSIGNMENT",
+              "PROJECT",
+              "PARTICIPATION"
+            ],
+            "default": "ASSIGNMENT",
+            "description": "Type of grade"
+          },
+          "maxPoints": {
+            "type": "number",
+            "format": "decimal",
+            "default": 100,
+            "description": "Maximum points possible for this grade"
+          },
+          "description": {
+            "type": "string",
+            "description": "Additional description or notes about the grade"
+          }
+        }
+      },
+      "UpdateGradeRequest": {
+        "type": "object",
+        "properties": {
+          "gradeValue": {
+            "type": "number",
+            "format": "decimal",
+            "minimum": 0,
+            "description": "Updated grade value"
+          },
+          "gradeType": {
+            "type": "string",
+            "enum": [
+              "EXAM",
+              "QUIZ",
+              "ASSIGNMENT",
+              "PROJECT",
+              "PARTICIPATION"
+            ],
+            "description": "Updated grade type"
+          },
+          "maxPoints": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Updated maximum points"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated description or notes"
+          }
+        }
+      },
+      "GradeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the grade"
+          },
+          "studentId": {
+            "type": "integer",
+            "description": "Student ID"
+          },
+          "subjectId": {
+            "type": "integer",
+            "description": "Subject ID"
+          },
+          "classId": {
+            "type": "integer",
+            "description": "Class ID"
+          },
+          "gradeValue": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Grade value"
+          },
+          "gradeType": {
+            "type": "string",
+            "enum": [
+              "EXAM",
+              "QUIZ",
+              "ASSIGNMENT",
+              "PROJECT",
+              "PARTICIPATION"
+            ],
+            "description": "Type of grade"
+          },
+          "maxPoints": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Maximum points possible"
+          },
+          "description": {
+            "type": "string",
+            "description": "Grade description"
+          },
+          "gradedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the grade was recorded"
+          },
+          "Student": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "User": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "Subject": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "Class": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "schedule": {
+                "type": "string"
+              },
+              "roomNumber": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "GradeStatistics": {
+        "type": "object",
+        "properties": {
+          "totalGrades": {
+            "type": "integer",
+            "description": "Total number of grades"
+          },
+          "averageGrade": {
+            "type": "string",
+            "description": "Average grade value"
+          },
+          "highestGrade": {
+            "type": "number",
+            "description": "Highest grade value"
+          },
+          "lowestGrade": {
+            "type": "number",
+            "description": "Lowest grade value"
+          }
+        }
+      },
+      "Material": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Material ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Material title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Material description"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "DOCUMENT",
+              "VIDEO",
+              "AUDIO",
+              "IMAGE",
+              "LINK"
+            ],
+            "description": "Type of material"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL or file path to the material"
+          },
+          "subjectId": {
+            "type": "integer",
+            "description": "Associated subject ID"
+          },
+          "teacherId": {
+            "type": "integer",
+            "description": "Teacher who uploaded the material"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MaterialRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "type",
+          "url",
+          "subjectId"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Introduction to Algebra"
+          },
+          "description": {
+            "type": "string",
+            "example": "Basic algebraic concepts and operations"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "DOCUMENT",
+              "VIDEO",
+              "AUDIO",
+              "IMAGE",
+              "LINK"
+            ],
+            "example": "DOCUMENT"
+          },
+          "url": {
+            "type": "string",
+            "example": "/uploads/algebra-intro.pdf"
+          },
+          "subjectId": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "LinkParentStudentRequest": {
+        "type": "object",
+        "required": [
+          "parentId",
+          "studentId"
+        ],
+        "properties": {
+          "parentId": {
+            "type": "integer",
+            "description": "ID of the parent to link"
+          },
+          "studentId": {
+            "type": "integer",
+            "description": "ID of the student to link"
+          }
+        }
+      },
+      "Grade": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the grade"
+          },
+          "studentId": {
+            "type": "integer",
+            "description": "Student ID"
+          },
+          "subjectId": {
+            "type": "integer",
+            "description": "Subject ID"
+          },
+          "classId": {
+            "type": "integer",
+            "description": "Class ID"
+          },
+          "gradeValue": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Grade value (0-100)"
+          },
+          "gradeType": {
+            "type": "string",
+            "enum": [
+              "EXAM",
+              "QUIZ",
+              "ASSIGNMENT",
+              "PROJECT",
+              "PARTICIPATION"
+            ],
+            "description": "Type of grade"
+          },
+          "maxPoints": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Maximum points possible"
+          },
+          "description": {
+            "type": "string",
+            "description": "Grade description"
+          },
+          "gradedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the grade was recorded"
+          },
+          "Student": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "User": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "Subject": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "Class": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "schedule": {
+                "type": "string"
+              },
+              "roomNumber": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Attendance": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the attendance record"
+          },
+          "studentId": {
+            "type": "integer",
+            "description": "Student ID"
+          },
+          "classId": {
+            "type": "integer",
+            "description": "Class ID"
+          },
+          "subjectId": {
+            "type": "integer",
+            "description": "Subject ID"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Attendance date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PRESENT",
+              "ABSENT",
+              "LATE",
+              "EXCUSED"
+            ],
+            "description": "Attendance status"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the attendance was recorded"
+          },
+          "Student": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "User": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "Class": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "schedule": {
+                "type": "string"
+              },
+              "roomNumber": {
+                "type": "string"
+              },
+              "Subject": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AttendanceStatistics": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer",
+            "description": "Total attendance records"
+          },
+          "present": {
+            "type": "integer",
+            "description": "Number of present records"
+          },
+          "absent": {
+            "type": "integer",
+            "description": "Number of absent records"
+          },
+          "late": {
+            "type": "integer",
+            "description": "Number of late records"
+          },
+          "excused": {
+            "type": "integer",
+            "description": "Number of excused records"
+          },
+          "attendanceRate": {
+            "type": "string",
+            "description": "Attendance rate percentage"
+          }
+        }
+      },
       "Student": {
         "type": "object",
         "properties": {
@@ -257,6 +928,150 @@
           }
         }
       },
+      "CreateSubjectRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Subject name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Subject description"
+          },
+          "credits": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6,
+            "default": 3,
+            "description": "Number of credits for the subject"
+          },
+          "department": {
+            "type": "string",
+            "default": "General",
+            "description": "Department the subject belongs to"
+          }
+        }
+      },
+      "UpdateSubjectRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Updated subject name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated subject description"
+          },
+          "credits": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6,
+            "description": "Updated number of credits"
+          },
+          "department": {
+            "type": "string",
+            "description": "Updated department"
+          }
+        }
+      },
+      "AssignTeacherRequest": {
+        "type": "object",
+        "required": [
+          "teacherId"
+        ],
+        "properties": {
+          "teacherId": {
+            "type": "integer",
+            "description": "ID of the teacher to assign"
+          }
+        }
+      },
+      "SubjectResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the subject"
+          },
+          "name": {
+            "type": "string",
+            "description": "Subject name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Subject description"
+          },
+          "credits": {
+            "type": "integer",
+            "description": "Number of credits"
+          },
+          "department": {
+            "type": "string",
+            "description": "Department name"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp"
+          },
+          "Teachers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "User": {
+                  "type": "object",
+                  "properties": {
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "Classes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "schedule": {
+                  "type": "string"
+                },
+                "roomNumber": {
+                  "type": "string"
+                },
+                "capacity": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
       "Teacher": {
         "type": "object",
         "properties": {
@@ -397,50 +1212,34 @@
           }
         }
       },
-      "User": {
+      "TokenStats": {
         "type": "object",
         "properties": {
-          "id": {
+          "totalBlacklistedTokens": {
             "type": "integer",
-            "description": "Unique identifier for the user"
+            "description": "Total number of blacklisted tokens"
           },
-          "firstName": {
-            "type": "string",
-            "description": "User's first name"
-          },
-          "lastName": {
-            "type": "string",
-            "description": "User's last name"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "User's email address"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "TEACHER",
-              "STUDENT",
-              "PARENT",
-              "STAFF"
-            ],
-            "description": "User's role in the system"
-          },
-          "phoneNumber": {
-            "type": "string",
-            "description": "User's phone number"
-          },
-          "createdAt": {
+          "lastCleanup": {
             "type": "string",
             "format": "date-time",
-            "description": "User creation timestamp"
+            "description": "Last cleanup timestamp"
+          }
+        }
+      },
+      "TokenValidation": {
+        "type": "object",
+        "properties": {
+          "isValid": {
+            "type": "boolean",
+            "description": "Whether the token is valid"
           },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "User last update timestamp"
+          "isBlacklisted": {
+            "type": "boolean",
+            "description": "Whether the token is blacklisted"
+          },
+          "user": {
+            "type": "object",
+            "description": "User information from token"
           }
         }
       },
@@ -525,6 +1324,1458 @@
     }
   },
   "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "description": "Create a new user account with the specified role",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation failed"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "User login",
+        "description": "Authenticate user and return JWT token",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required fields"
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid email or password"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "User logout",
+        "description": "Logout user and blacklist the JWT token to prevent reuse",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged out successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logged out successfully - token has been revoked"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No token provided"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "500": {
+            "description": "Failed to revoke token or internal server error"
+          }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "summary": "Get current user profile",
+        "description": "Retrieve the authenticated user's profile information",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Refresh JWT token",
+        "description": "Generate a new access token using a valid refresh token",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Refresh token is required"
+          },
+          "401": {
+            "description": "Invalid or expired refresh token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/grades": {
+      "post": {
+        "summary": "Assign grade to student",
+        "description": "Create a new grade record for a student in a specific subject",
+        "tags": [
+          "Grades"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGradeRequest"
+              },
+              "example": {
+                "studentId": 1,
+                "subjectId": 2,
+                "classId": 3,
+                "gradeValue": 85.5,
+                "gradeType": "EXAM",
+                "maxPoints": 100,
+                "description": "Midterm examination"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Grade assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Grade assigned successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GradeResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Validation errors"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teacher/Admin access required"
+          },
+          "404": {
+            "description": "Student, subject, or class not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/grades/class/{classId}": {
+      "get": {
+        "summary": "Fetch grades by class",
+        "description": "Retrieve all grades for students in a specific class with optional filtering",
+        "tags": [
+          "Grades"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "classId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Class ID"
+          },
+          {
+            "in": "query",
+            "name": "gradeType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EXAM",
+                "QUIZ",
+                "ASSIGNMENT",
+                "PROJECT",
+                "PARTICIPATION"
+              ]
+            },
+            "description": "Filter by grade type"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades from this date"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Grades retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Grades retrieved successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GradeResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teacher/Admin access required"
+          },
+          "404": {
+            "description": "Class not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/grades/student/{studentId}": {
+      "get": {
+        "summary": "Fetch grades by student",
+        "description": "Retrieve all grades for a specific student with statistics and optional filtering",
+        "tags": [
+          "Grades"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "studentId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Student ID"
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by subject ID"
+          },
+          {
+            "in": "query",
+            "name": "gradeType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EXAM",
+                "QUIZ",
+                "ASSIGNMENT",
+                "PROJECT",
+                "PARTICIPATION"
+              ]
+            },
+            "description": "Filter by grade type"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades from this date"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Student grades retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Student grades retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "grades": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/GradeResponse"
+                          }
+                        },
+                        "statistics": {
+                          "$ref": "#/components/schemas/GradeStatistics"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions"
+          },
+          "404": {
+            "description": "Student not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/grades/subject/{subjectId}": {
+      "get": {
+        "summary": "Fetch grades by subject",
+        "description": "Retrieve all grades for a specific subject with optional filtering",
+        "tags": [
+          "Grades"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subjectId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Subject ID"
+          },
+          {
+            "in": "query",
+            "name": "classId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by class ID"
+          },
+          {
+            "in": "query",
+            "name": "gradeType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EXAM",
+                "QUIZ",
+                "ASSIGNMENT",
+                "PROJECT",
+                "PARTICIPATION"
+              ]
+            },
+            "description": "Filter by grade type"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades from this date"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subject grades retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Subject grades retrieved successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GradeResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teacher/Admin access required"
+          },
+          "404": {
+            "description": "Subject not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/grades/{id}": {
+      "put": {
+        "summary": "Update grade",
+        "description": "Update an existing grade record",
+        "tags": [
+          "Grades"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Grade ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGradeRequest"
+              },
+              "example": {
+                "gradeValue": 92,
+                "gradeType": "EXAM",
+                "description": "Updated final exam grade"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Grade updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Grade updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GradeResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Validation errors"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teacher/Admin access required"
+          },
+          "404": {
+            "description": "Grade not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/materials": {
+      "get": {
+        "summary": "List all materials",
+        "description": "Retrieve a list of educational materials (Teachers and Students only)",
+        "tags": [
+          "Materials"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of materials per page"
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by subject ID"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DOCUMENT",
+                "VIDEO",
+                "AUDIO",
+                "IMAGE",
+                "LINK"
+              ]
+            },
+            "description": "Filter by material type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Materials retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Materials retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "materials": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Material"
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "pages": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new material",
+        "description": "Upload or create a new educational material (Teachers only)",
+        "tags": [
+          "Materials"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Material created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Material created successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "material": {
+                          "$ref": "#/components/schemas/Material"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation errors"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teachers only"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/materials/{id}": {
+      "get": {
+        "summary": "Get material by ID",
+        "description": "Retrieve a specific educational material by its ID (Teachers and Students only)",
+        "tags": [
+          "Materials"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Material ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Material retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Material retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "material": {
+                          "$ref": "#/components/schemas/Material"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions"
+          },
+          "404": {
+            "description": "Material not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update material",
+        "description": "Update an existing educational material (Teachers only)",
+        "tags": [
+          "Materials"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Material ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Material updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Material updated successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "material": {
+                          "$ref": "#/components/schemas/Material"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation errors"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teachers only"
+          },
+          "404": {
+            "description": "Material not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete material",
+        "description": "Delete an educational material (Teachers only)",
+        "tags": [
+          "Materials"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Material ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Material deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Material deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Teachers only"
+          },
+          "404": {
+            "description": "Material not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/parents/link": {
+      "post": {
+        "summary": "Link parent to student",
+        "description": "Create a many-to-many relationship between a parent and student",
+        "tags": [
+          "Parents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkParentStudentRequest"
+              },
+              "example": {
+                "parentId": 1,
+                "studentId": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parent linked to student successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Parent linked to student successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "parent": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "student": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Missing required fields"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "404": {
+            "description": "Parent or student not found"
+          },
+          "409": {
+            "description": "Conflict - Parent already linked to student"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/parents/{id}/grades": {
+      "get": {
+        "summary": "View child grades",
+        "description": "Retrieve grades for all children of a specific parent with optional filtering",
+        "tags": [
+          "Parents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Parent ID"
+          },
+          {
+            "in": "query",
+            "name": "studentId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by specific student ID"
+          },
+          {
+            "in": "query",
+            "name": "subjectId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by subject ID"
+          },
+          {
+            "in": "query",
+            "name": "gradeType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EXAM",
+                "QUIZ",
+                "ASSIGNMENT",
+                "PROJECT",
+                "PARTICIPATION"
+              ]
+            },
+            "description": "Filter by grade type"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades from this date"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter grades until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Child grades retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Child grades retrieved successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Grade"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Access denied or insufficient permissions"
+          },
+          "404": {
+            "description": "Parent not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/parents/{id}/attendance": {
+      "get": {
+        "summary": "View child attendance",
+        "description": "Retrieve attendance records for all children of a specific parent with statistics",
+        "tags": [
+          "Parents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Parent ID"
+          },
+          {
+            "in": "query",
+            "name": "studentId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by specific student ID"
+          },
+          {
+            "in": "query",
+            "name": "classId",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by class ID"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PRESENT",
+                "ABSENT",
+                "LATE",
+                "EXCUSED"
+              ]
+            },
+            "description": "Filter by attendance status"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter attendance from this date"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Filter attendance until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Child attendance retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Child attendance retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "attendance": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Attendance"
+                          }
+                        },
+                        "statistics": {
+                          "$ref": "#/components/schemas/AttendanceStatistics"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Access denied or insufficient permissions"
+          },
+          "404": {
+            "description": "Parent not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/students": {
       "get": {
         "summary": "List all students",
@@ -1116,6 +3367,559 @@
         }
       }
     },
+    "/subjects": {
+      "post": {
+        "summary": "Create new subject",
+        "description": "Create a new subject in the system (Admin only)",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubjectRequest"
+              },
+              "example": {
+                "name": "Mathematics",
+                "description": "Advanced mathematics course covering algebra, calculus, and statistics",
+                "credits": 4,
+                "department": "Mathematics"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subject created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Subject created successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SubjectResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Validation errors or subject already exists"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "List all subjects",
+        "description": "Retrieve all subjects with optional filtering and pagination",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Number of items per page"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for subject name or description"
+          },
+          {
+            "in": "query",
+            "name": "department",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by department"
+          },
+          {
+            "in": "query",
+            "name": "credits",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by number of credits"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "credits",
+                "department",
+                "createdAt"
+              ],
+              "default": "name"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subjects retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Subjects retrieved successfully"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "subjects": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/SubjectResponse"
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "currentPage": {
+                              "type": "integer"
+                            },
+                            "totalPages": {
+                              "type": "integer"
+                            },
+                            "totalItems": {
+                              "type": "integer"
+                            },
+                            "itemsPerPage": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/subjects/{id}": {
+      "get": {
+        "summary": "Get subject by ID",
+        "description": "Retrieve a specific subject with its teachers and classes",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Subject ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subject retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Subject retrieved successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SubjectResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "404": {
+            "description": "Subject not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update subject",
+        "description": "Update an existing subject (Admin only)",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Subject ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubjectRequest"
+              },
+              "example": {
+                "name": "Advanced Mathematics",
+                "description": "Updated course description",
+                "credits": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subject updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Subject updated successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SubjectResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Validation errors or name conflict"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "404": {
+            "description": "Subject not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete subject",
+        "description": "Delete a subject from the system (Admin only)",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Subject ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subject deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Subject deleted successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Subject has associated classes"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "404": {
+            "description": "Subject not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/subjects/{id}/teachers": {
+      "post": {
+        "summary": "Assign teacher to subject",
+        "description": "Assign a teacher to teach a specific subject (Admin only)",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Subject ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignTeacherRequest"
+              },
+              "example": {
+                "teacherId": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Teacher assigned to subject successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Teacher assigned to subject successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Teacher already assigned or missing teacherId"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "404": {
+            "description": "Subject or teacher not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/subjects/{id}/teachers/{teacherId}": {
+      "delete": {
+        "summary": "Remove teacher from subject",
+        "description": "Remove a teacher's assignment from a specific subject (Admin only)",
+        "tags": [
+          "Subjects"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Subject ID"
+          },
+          {
+            "in": "path",
+            "name": "teacherId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Teacher ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Teacher removed from subject successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Teacher removed from subject successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Teacher not assigned to this subject"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "404": {
+            "description": "Subject or teacher not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/teachers": {
       "get": {
         "summary": "List all teachers",
@@ -1701,6 +4505,203 @@
           },
           "404": {
             "description": "Teacher not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/tokens/validate": {
+      "get": {
+        "summary": "Validate current token",
+        "description": "Check if the current JWT token is valid and not blacklisted",
+        "tags": [
+          "Token Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token validation completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Token validation completed"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TokenValidation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or blacklisted token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/tokens/logout-all": {
+      "post": {
+        "summary": "Logout all sessions",
+        "description": "Terminate all active sessions for the current user",
+        "tags": [
+          "Token Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All sessions terminated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "All sessions have been terminated"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/admin/tokens/stats": {
+      "get": {
+        "summary": "Get blacklist statistics",
+        "description": "Retrieve statistics about the token blacklist (Admin only)",
+        "tags": [
+          "Admin - Token Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blacklist statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Blacklist statistics retrieved successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TokenStats"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/admin/tokens/blacklist": {
+      "delete": {
+        "summary": "Clear token blacklist",
+        "description": "Remove all tokens from the blacklist (Admin only)",
+        "tags": [
+          "Admin - Token Management"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blacklist cleared successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully cleared 5 tokens from blacklist"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "clearedCount": {
+                          "type": "integer",
+                          "example": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          },
+          "403": {
+            "description": "Forbidden - Admin access required"
           },
           "500": {
             "description": "Internal server error"
