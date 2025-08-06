@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const { authenticate } = require('../middlewares/authenticate');
 const { authorize } = require('../middlewares/authorize');
+const isAugust = require('../middlewares/isAugust');
 const studentController = require('../controllers/studentController');
 
 const router = Router();
@@ -559,5 +560,75 @@ router.put('/:id', authenticate, authorize(['ADMIN', 'TEACHER']), studentControl
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.delete('/:id', authenticate, authorize(['ADMIN']), studentController.delete);
+
+/**
+ * @swagger
+ * /students/signup:
+ *   post:
+ *     summary: Public student signup (August only)
+ *     description: Allows a new student to register for an account. This endpoint is only active during August.
+ *     tags: [Students]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               gradeLevelId:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Student signed up successfully.
+ *       400:
+ *         description: Bad request (e.g., missing fields, user exists).
+ *       403:
+ *         description: Forbidden (not August).
+ */
+router.post('/signup', isAugust, studentController.publicSignup);
+
+/**
+ * @swagger
+ * /students/promote:
+ *   post:
+ *     summary: Promote students to the next grade (Admin, August only)
+ *     description: Updates the grade level for a list of students. This endpoint is only active during August.
+ *     tags: [Students]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               studentIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *               nextGradeLevelId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Students promoted successfully.
+ *       400:
+ *         description: Bad request (e.g., missing fields).
+ *       403:
+ *         description: Forbidden (not August or insufficient permissions).
+ *       404:
+ *         description: Grade level or students not found.
+ */
+router.post('/promote', authenticate, authorize(['ADMIN']), isAugust, studentController.promote);
 
 module.exports = router;

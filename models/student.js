@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
       // Belongs to associations
       Student.belongsTo(models.User, { foreignKey: 'userId' });
       Student.belongsTo(models.GradeLevel, { foreignKey: 'gradeLevelId' });
-      Student.belongsTo(models.Class, { foreignKey: 'classId' });
       
       // Many-to-many with Parent (through ParentStudents join table)
       Student.belongsToMany(models.Parent, { 
@@ -22,12 +21,19 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'parentId',
         as: 'Parents'
       });
+
+      // Many-to-many with Class (through Enrollment join table)
+      Student.belongsToMany(models.Class, {
+        through: models.Enrollment,
+        foreignKey: 'studentId',
+        otherKey: 'classId',
+        as: 'Classes' // Add alias to match controller queries
+      });
     }
   }
   Student.init({
     userId: DataTypes.INTEGER,
-    gradeLevelId: DataTypes.INTEGER,
-    classId: DataTypes.INTEGER
+    gradeLevelId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Student',

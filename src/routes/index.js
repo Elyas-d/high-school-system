@@ -9,6 +9,7 @@ const gradeRoutes = require('./grades');
 const subjectRoutes = require('./subjects');
 const tokenRoutes = require('./tokens');
 const materialsRoutes = require('./materials');
+const enrollmentRoutes = require('./enrollments');
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/grades', gradeRoutes);
 router.use('/subjects', subjectRoutes);
 router.use('/tokens', tokenRoutes);
 router.use('/materials', materialsRoutes);
+router.use('/enrollments', enrollmentRoutes);
 
 module.exports = router;

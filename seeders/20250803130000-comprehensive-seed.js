@@ -14,7 +14,6 @@ module.exports = {
 
     // 1. Create Users (Admin, Teachers, Parents, Students)
     await queryInterface.bulkInsert('Users', [
-      // Admin/Staff Users
       {
         firstName: 'Sarah',
         lastName: 'Johnson',
@@ -35,8 +34,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-      
-      // Teacher Users
       {
         firstName: 'Dr. Emily',
         lastName: 'Rodriguez',
@@ -87,8 +84,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-
-      // Parent Users
       {
         firstName: 'David',
         lastName: 'Anderson',
@@ -129,8 +124,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-
-      // Student Users
       {
         firstName: 'Alex',
         lastName: 'Anderson',
@@ -258,7 +251,7 @@ module.exports = {
       { type: Sequelize.QueryTypes.SELECT }
     );
 
-    // 3. Create Subjects (matching actual Subject model schema)
+    // 3. Create Subjects
     await queryInterface.bulkInsert('Subjects', [
       {
         name: 'Mathematics',
@@ -357,9 +350,8 @@ module.exports = {
       { type: Sequelize.QueryTypes.SELECT }
     );
 
-    // 7. Create Classes (multiple classes per subject with different teachers)
+    // 7. Create Classes
     const classData = [
-      // Mathematics classes
       {
         subjectId: subjects.find(s => s.name === 'Mathematics').id,
         teacherId: teachers[0].id,
@@ -376,7 +368,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-      // English classes
       {
         subjectId: subjects.find(s => s.name === 'English Literature').id,
         teacherId: teachers[1].id,
@@ -393,7 +384,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-      // Science classes
       {
         subjectId: subjects.find(s => s.name === 'Biology').id,
         teacherId: teachers[2].id,
@@ -418,7 +408,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-      // History class
       {
         subjectId: subjects.find(s => s.name === 'World History').id,
         teacherId: teachers[4].id,
@@ -427,7 +416,6 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },
-      // PE and Art classes
       {
         subjectId: subjects.find(s => s.name === 'Physical Education').id,
         teacherId: teachers[4].id,
@@ -452,61 +440,53 @@ module.exports = {
       { type: Sequelize.QueryTypes.SELECT }
     );
 
-    // 8. Create Student records with varied grade levels and classes
+    // 8. Create Student records
     const studentData = [
       {
         userId: studentUsers[0].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 10').id,
-        classId: classes[0].id, // Math class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[1].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 10').id,
-        classId: classes[2].id, // English class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[2].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 11').id,
-        classId: classes[4].id, // Biology class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[3].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 11').id,
-        classId: classes[5].id, // Chemistry class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[4].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 12').id,
-        classId: classes[6].id, // Physics class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[5].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 12').id,
-        classId: classes[7].id, // History class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[6].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 9').id,
-        classId: classes[8].id, // PE class
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         userId: studentUsers[7].id,
         gradeLevelId: gradeLevels.find(g => g.name === 'Grade 9').id,
-        classId: classes[9].id, // Art class
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -524,11 +504,29 @@ module.exports = {
       { parentId: parents[1].id, studentId: students[1].id, createdAt: new Date(), updatedAt: new Date() },
       { parentId: parents[2].id, studentId: students[2].id, createdAt: new Date(), updatedAt: new Date() },
       { parentId: parents[3].id, studentId: students[3].id, createdAt: new Date(), updatedAt: new Date() },
-      // Some parents can have multiple children
       { parentId: parents[0].id, studentId: students[4].id, createdAt: new Date(), updatedAt: new Date() },
       { parentId: parents[1].id, studentId: students[5].id, createdAt: new Date(), updatedAt: new Date() }
     ];
     await queryInterface.bulkInsert('ParentStudents', parentStudentData);
+
+    const academicYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+
+    // 10. Create Enrollments to link Students to Classes
+    const enrollmentData = [
+      { studentId: students[0].id, classId: classes[0].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[0].id, classId: classes[2].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[1].id, classId: classes[1].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[1].id, classId: classes[3].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[2].id, classId: classes[4].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[2].id, classId: classes[5].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[3].id, classId: classes[4].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[3].id, classId: classes[5].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[4].id, classId: classes[6].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[5].id, classId: classes[7].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[6].id, classId: classes[8].id, academicYear, createdAt: new Date(), updatedAt: new Date() },
+      { studentId: students[7].id, classId: classes[9].id, academicYear, createdAt: new Date(), updatedAt: new Date() }
+    ];
+    await queryInterface.bulkInsert('Enrollments', enrollmentData);
 
     console.log('✅ Comprehensive seed data created successfully!');
     console.log(`📊 Created: ${users.length} users, ${gradeLevels.length} grade levels, ${subjects.length} subjects, ${classes.length} classes, ${students.length} students`);
@@ -536,6 +534,7 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     // Remove data in reverse order to respect foreign key constraints
+    await queryInterface.bulkDelete('Enrollments', null, {});
     await queryInterface.bulkDelete('ParentStudents', null, {});
     await queryInterface.bulkDelete('Students', null, {});
     await queryInterface.bulkDelete('Classes', null, {});

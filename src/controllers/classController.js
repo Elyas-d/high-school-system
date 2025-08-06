@@ -1,4 +1,4 @@
-const { Class, Teacher, Student, Subject } = require('../../models');
+const { Class, Teacher, Student, Subject, Enrollment } = require('../../models');
 
 module.exports = {
   // List all classes
@@ -23,7 +23,11 @@ module.exports = {
         include: [
           { model: Teacher, attributes: ['id', 'userId'] },
           { model: Subject, attributes: ['id', 'name'] },
-          { model: Student, attributes: ['id', 'userId'] }
+          { 
+            model: Student, 
+            attributes: ['id', 'userId'],
+            through: { attributes: ['academicYear', 'finalGrade'] } // Include enrollment details
+          }
         ]
       });
       if (!classObj) return res.status(404).json({ error: 'Class not found' });
@@ -116,22 +120,6 @@ module.exports = {
       res.json({ message: 'Teacher assigned', class: classObj });
     } catch (err) {
       res.status(400).json({ error: 'Failed to assign teacher' });
-    }
-  },
-
-  // Assign students to class
-  async assignStudents(req, res) {
-    try {
-      const { studentIds } = req.body; // array of student IDs
-      const classObj = await Class.findByPk(req.params.id);
-      if (!classObj) return res.status(404).json({ error: 'Class not found' });
-      await Student.update(
-        { classId: classObj.id },
-        { where: { id: studentIds } }
-      );
-      res.json({ message: 'Students assigned to class' });
-    } catch (err) {
-      res.status(400).json({ error: 'Failed to assign students' });
     }
   },
 

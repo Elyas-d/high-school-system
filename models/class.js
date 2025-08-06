@@ -16,8 +16,11 @@ module.exports = (sequelize, DataTypes) => {
       // Belongs to Teacher
       Class.belongsTo(models.Teacher, { foreignKey: 'teacherId' });
       
-      // Has many Students
-      Class.hasMany(models.Student, { foreignKey: 'classId' });
+      // Has many Students through Enrollment
+      Class.belongsToMany(models.Student, {
+        through: models.Enrollment,
+        foreignKey: 'classId'
+      });
     }
   }
   Class.init({
@@ -30,4 +33,4 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'Class',
   });
   return Class;
-}; 
+};

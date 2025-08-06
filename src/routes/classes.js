@@ -23,9 +23,6 @@ router.delete('/:id', authenticate, authorize(['ADMIN']), classController.delete
 // POST /api/classes/:id/assign-teacher - Assign teacher to class (Admin/Teacher)
 router.post('/:id/assign-teacher', authenticate, authorize(['ADMIN', 'TEACHER']), classController.assignTeacher);
 
-// POST /api/classes/:id/assign-students - Assign students to class (Admin/Teacher)
-router.post('/:id/assign-students', authenticate, authorize(['ADMIN', 'TEACHER']), classController.assignStudents);
-
 // GET /api/classes/:id/schedule - Get class schedule (Admin/Staff/Teacher)
 router.get('/:id/schedule', authenticate, authorize(['ADMIN', 'STAFF', 'TEACHER']), classController.getSchedule);
 

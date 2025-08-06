@@ -7,6 +7,9 @@ const router = Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Parents
+ *     description: Parent management and parent-student relationships
  * components:
  *   schemas:
  *     LinkParentStudentRequest:
@@ -26,35 +29,26 @@ const router = Router();
  *       properties:
  *         id:
  *           type: integer
- *           description: Unique identifier for the grade
  *         studentId:
  *           type: integer
- *           description: Student ID
  *         subjectId:
  *           type: integer
- *           description: Subject ID
  *         classId:
  *           type: integer
- *           description: Class ID
  *         gradeValue:
  *           type: number
  *           format: decimal
- *           description: Grade value (0-100)
  *         gradeType:
  *           type: string
  *           enum: [EXAM, QUIZ, ASSIGNMENT, PROJECT, PARTICIPATION]
- *           description: Type of grade
  *         maxPoints:
  *           type: number
  *           format: decimal
- *           description: Maximum points possible
  *         description:
  *           type: string
- *           description: Grade description
  *         gradedAt:
  *           type: string
  *           format: date-time
- *           description: When the grade was recorded
  *         Student:
  *           type: object
  *           properties:
@@ -90,31 +84,23 @@ const router = Router();
  *       properties:
  *         id:
  *           type: integer
- *           description: Unique identifier for the attendance record
  *         studentId:
  *           type: integer
- *           description: Student ID
  *         classId:
  *           type: integer
- *           description: Class ID
  *         subjectId:
  *           type: integer
- *           description: Subject ID
  *         date:
  *           type: string
  *           format: date
- *           description: Attendance date
  *         status:
  *           type: string
  *           enum: [PRESENT, ABSENT, LATE, EXCUSED]
- *           description: Attendance status
  *         notes:
  *           type: string
- *           description: Additional notes
  *         recordedAt:
  *           type: string
  *           format: date-time
- *           description: When the attendance was recorded
  *         Student:
  *           type: object
  *           properties:
@@ -150,31 +136,92 @@ const router = Router();
  *       properties:
  *         totalRecords:
  *           type: integer
- *           description: Total attendance records
  *         present:
  *           type: integer
- *           description: Number of present records
  *         absent:
  *           type: integer
- *           description: Number of absent records
  *         late:
  *           type: integer
- *           description: Number of late records
  *         excused:
  *           type: integer
- *           description: Number of excused records
  *         attendanceRate:
  *           type: string
- *           description: Attendance rate percentage
  */
+
+/**
+ * @swagger
+ * /parents/signup:
+ *   post:
+ *     tags: [Parents]
+ *     summary: Register a new parent and link to a student
+ *     description: Creates a new user with the PARENT role, an associated parent profile, and links them to a student.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - password
+ *               - studentId
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               phoneNumber:
+ *                 type: string
+ *               studentId:
+ *                 type: integer
+ *                 description: The ID of the student to link to this parent.
+ *           example:
+ *             firstName: "John"
+ *             lastName: "Doe"
+ *             email: "john.doe@example.com"
+ *             password: "password123"
+ *             phoneNumber: "123-456-7890"
+ *             studentId: 1
+ *     responses:
+ *       201:
+ *         description: Parent registered and linked successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Bad request - Missing required fields.
+ *       404:
+ *         description: Student not found.
+ *       409:
+ *         description: Conflict - A user with this email already exists.
+ *       500:
+ *         description: Internal server error.
+ */
+router.post('/signup', parentController.signUp);
 
 /**
  * @swagger
  * /parents/link:
  *   post:
+ *     tags: [Parents]
  *     summary: Link parent to student
  *     description: Create a many-to-many relationship between a parent and student
- *     tags: [Parents]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -196,31 +243,10 @@ const router = Router();
  *               properties:
  *                 success:
  *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: Parent linked to student successfully
  *                 data:
  *                   type: object
- *                   properties:
- *                     parent:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                         name:
- *                           type: string
- *                         email:
- *                           type: string
- *                     student:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                         name:
- *                           type: string
- *                         email:
- *                           type: string
  *       400:
  *         description: Bad request - Missing required fields
  *       401:
@@ -238,11 +264,63 @@ router.post('/link', authenticate, authorize(['ADMIN']), parentController.linkTo
 
 /**
  * @swagger
+ * /parents/me/children:
+ *   get:
+ *     tags: [Parents]
+ *     summary: Get current parent's children
+ *     description: Retrieve a list of children linked to the currently authenticated parent.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved children.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       userId:
+ *                         type: integer
+ *                       User:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                           firstName:
+ *                             type: string
+ *                           lastName:
+ *                             type: string
+ *                           email:
+ *                             type: string
+ *       401:
+ *         description: Unauthorized - Invalid or missing token.
+ *       403:
+ *         description: Forbidden - User is not a parent.
+ *       404:
+ *         description: Parent profile not found for the current user.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get('/me/children', authenticate, authorize(['PARENT']), parentController.getMyChildren);
+
+/**
+ * @swagger
  * /parents/{id}/grades:
  *   get:
+ *     tags: [Parents]
  *     summary: View child grades
  *     description: Retrieve grades for all children of a specific parent with optional filtering
- *     tags: [Parents]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -290,10 +368,8 @@ router.post('/link', authenticate, authorize(['ADMIN']), parentController.linkTo
  *               properties:
  *                 success:
  *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: Child grades retrieved successfully
  *                 data:
  *                   type: array
  *                   items:
@@ -313,9 +389,9 @@ router.get('/:id/grades', authenticate, authorize(['ADMIN', 'PARENT']), parentCo
  * @swagger
  * /parents/{id}/attendance:
  *   get:
+ *     tags: [Parents]
  *     summary: View child attendance
  *     description: Retrieve attendance records for all children of a specific parent with statistics
- *     tags: [Parents]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -363,10 +439,8 @@ router.get('/:id/grades', authenticate, authorize(['ADMIN', 'PARENT']), parentCo
  *               properties:
  *                 success:
  *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
- *                   example: Child attendance retrieved successfully
  *                 data:
  *                   type: object
  *                   properties:
@@ -386,5 +460,44 @@ router.get('/:id/grades', authenticate, authorize(['ADMIN', 'PARENT']), parentCo
  *         description: Internal server error
  */
 router.get('/:id/attendance', authenticate, authorize(['ADMIN', 'PARENT']), parentController.getChildAttendance);
+
+/**
+ * @swagger
+ * /parents/{id}:
+ *   delete:
+ *     tags: [Parents]
+ *     summary: Delete a parent
+ *     description: Deletes a parent and their associated user account. This action is irreversible.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the parent to delete.
+ *     responses:
+ *       200:
+ *         description: Parent deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized - Invalid or missing token.
+ *       403:
+ *         description: Forbidden - Admin access required.
+ *       404:
+ *         description: Parent not found.
+ *       500:
+ *         description: Internal server error.
+ */
+router.delete('/:id', authenticate, authorize(['ADMIN']), parentController.deleteParent);
 
 module.exports = router;

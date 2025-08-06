@@ -1,5 +1,6 @@
 const { User, Student, GradeLevel, Class, Parent, ParentStudent } = require('../../models');
 const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 class StudentController {
   /**
@@ -27,49 +28,47 @@ class StudentController {
         whereClause.gradeLevelId = gradeLevel;
       }
       
+      const includeClause = [
+        {
+          model: User,
+          as: 'User',
+          attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'phoneNumber']
+        },
+        {
+          model: GradeLevel,
+          as: 'GradeLevel',
+          attributes: ['id', 'name', 'description']
+        },
+        {
+          model: Class,
+          as: 'Classes', // Note: Alias should match the association in the model
+          through: { attributes: [] } // Don't include enrollment details in the list view
+        },
+        {
+          model: Parent,
+          as: 'Parents',
+          through: { attributes: [] },
+          include: [
+            {
+              model: User,
+              as: 'User',
+              attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber']
+            }
+          ]
+        }
+      ];
+
+      // If filtering by classId, add it to the include clause for Class
       if (classId) {
-        whereClause.classId = classId;
+        const classInclude = includeClause.find(i => i.model === Class);
+        classInclude.where = { id: classId };
+        classInclude.required = true; // Makes it an INNER JOIN
       }
 
       // Get students with pagination and includes
       const { count, rows: students } = await Student.findAndCountAll({
         where: whereClause,
-        include: [
-          {
-            model: User,
-            as: 'User',
-            attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'phoneNumber']
-          },
-          {
-            model: GradeLevel,
-            as: 'GradeLevel',
-            attributes: ['id', 'name', 'description']
-          },
-          {
-            model: Class,
-            as: 'Class',
-            attributes: ['id', 'schedule', 'roomNumber'],
-            include: [
-              {
-                model: require('../../models').Subject,
-                as: 'Subject',
-                attributes: ['id', 'name', 'description']
-              }
-            ]
-          },
-          {
-            model: Parent,
-            as: 'Parents',
-            through: { attributes: [] },
-            include: [
-              {
-                model: User,
-                as: 'User',
-                attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber']
-              }
-            ]
-          }
-        ],
+        include: includeClause,
         order: [[sortBy, sortOrder]],
         limit: parseInt(limit),
         offset: parseInt(offset)
@@ -121,15 +120,8 @@ class StudentController {
           },
           {
             model: Class,
-            as: 'Class',
-            attributes: ['id', 'schedule', 'roomNumber'],
-            include: [
-              {
-                model: require('../../models').Subject,
-                as: 'Subject',
-                attributes: ['id', 'name', 'description']
-              }
-            ]
+            as: 'Classes', // Alias should match the association
+            through: { attributes: ['academicYear', 'finalGrade'] } // Include enrollment details
           },
           {
             model: Parent,
@@ -176,7 +168,7 @@ class StudentController {
    */
   async create(req, res) {
     try {
-      const { firstName, lastName, email, password, phoneNumber, gradeLevelId, classId, parentIds } = req.body;
+      const { firstName, lastName, email, password, phoneNumber, gradeLevelId, parentIds } = req.body;
 
       // Validate required fields
       if (!firstName || !lastName || !email || !password || !gradeLevelId) {
@@ -232,32 +224,7 @@ class StudentController {
         });
       }
 
-      // Validate class exists if provided
-      if (classId) {
-        const classRecord = await Class.findByPk(classId);
-        if (!classRecord) {
-          return res.status(400).json({
-            success: false,
-            message: 'Class not found',
-            errors: [{ field: 'classId', message: 'Invalid class' }]
-          });
-        }
-      }
-
-      // Validate parents exist if provided
-      if (parentIds && parentIds.length > 0) {
-        const parents = await Parent.findAll({ where: { id: parentIds } });
-        if (parents.length !== parentIds.length) {
-          return res.status(400).json({
-            success: false,
-            message: 'One or more parents not found',
-            errors: [{ field: 'parentIds', message: 'Invalid parent IDs' }]
-          });
-        }
-      }
-
       // Hash password
-      const bcrypt = require('bcryptjs');
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -275,7 +242,6 @@ class StudentController {
       const student = await Student.create({
         userId: user.id,
         gradeLevelId,
-        classId: classId || null
       });
 
       // Associate with parents if provided
@@ -298,7 +264,7 @@ class StudentController {
           },
           {
             model: Class,
-            as: 'Class',
+            as: 'Classes',
             attributes: ['id', 'schedule', 'roomNumber']
           },
           {
@@ -333,13 +299,78 @@ class StudentController {
   }
 
   /**
+   * Public student signup, only available in August.
+   * POST /students/signup
+   */
+  async publicSignup(req, res) {
+    try {
+      const { firstName, lastName, email, password, gradeLevelId } = req.body;
+
+      // --- Validation ---
+      const errors = [];
+      if (!firstName) errors.push({ field: 'firstName', message: 'First name is required' });
+      if (!lastName) errors.push({ field: 'lastName', message: 'Last name is required' });
+      if (!email) errors.push({ field: 'email', message: 'Email is required' });
+      if (!password) errors.push({ field: 'password', message: 'Password is required' });
+      if (!gradeLevelId) errors.push({ field: 'gradeLevelId', message: 'Grade level is required' });
+
+      if (errors.length > 0) {
+        return res.status(400).json({ success: false, message: 'Required fields missing', errors });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: 'User with this email already exists' });
+      }
+
+      // Validate grade level exists
+      const gradeLevel = await GradeLevel.findByPk(gradeLevelId);
+      if (!gradeLevel) {
+        return res.status(400).json({ success: false, message: 'Grade level not found' });
+      }
+      // --- End Validation ---
+
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const user = await User.create({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        role: 'STUDENT',
+      });
+
+      const student = await Student.create({
+        userId: user.id,
+        gradeLevelId,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Student signed up successfully. Please await admin approval.',
+        data: {
+          studentId: student.id,
+          userId: user.id,
+          email: user.email,
+        }
+      });
+
+    } catch (error) {
+      console.error('Public signup error:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }
+
+  /**
    * Update student
    * PUT /students/:id
    */
   async update(req, res) {
     try {
       const { id } = req.params;
-      const { firstName, lastName, email, phoneNumber, gradeLevelId, classId, parentIds } = req.body;
+      const { firstName, lastName, email, phoneNumber, gradeLevelId, parentIds } = req.body;
 
       // Find student
       const student = await Student.findByPk(id, {
@@ -413,21 +444,6 @@ class StudentController {
         studentUpdateData.gradeLevelId = gradeLevelId;
       }
 
-      if (classId !== undefined) {
-        if (classId) {
-          // Validate class exists
-          const classRecord = await Class.findByPk(classId);
-          if (!classRecord) {
-            return res.status(400).json({
-              success: false,
-              message: 'Class not found',
-              errors: [{ field: 'classId', message: 'Invalid class' }]
-            });
-          }
-        }
-        studentUpdateData.classId = classId;
-      }
-
       if (Object.keys(studentUpdateData).length > 0) {
         await student.update(studentUpdateData);
       }
@@ -466,7 +482,7 @@ class StudentController {
           },
           {
             model: Class,
-            as: 'Class',
+            as: 'Classes',
             attributes: ['id', 'schedule', 'roomNumber']
           },
           {
@@ -547,6 +563,43 @@ class StudentController {
       });
     }
   }
+
+  /**
+   * Promote a list of students to the next grade level
+   * POST /students/promote
+   */
+  async promote(req, res) {
+    const { studentIds, nextGradeLevelId } = req.body;
+
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({ error: 'studentIds (non-empty array) is required.' });
+    }
+    if (!nextGradeLevelId || typeof nextGradeLevelId !== 'number') {
+      return res.status(400).json({ error: 'nextGradeLevelId (number) is required.' });
+    }
+
+    try {
+      // Verify the target grade level exists
+      const gradeLevel = await GradeLevel.findByPk(nextGradeLevelId);
+      if (!gradeLevel) {
+        return res.status(404).json({ error: 'Target grade level not found.' });
+      }
+
+      // Bulk update students' grade level
+      const [updatedCount] = await Student.update(
+        { gradeLevelId: nextGradeLevelId },
+        { where: { id: studentIds } }
+      );
+
+      if (updatedCount === 0) {
+        return res.status(404).json({ message: 'No students found or updated for the given IDs.' });
+      }
+
+      res.json({ message: `${updatedCount} student(s) promoted successfully to ${gradeLevel.name}.` });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to promote students.' });
+    }
+  }
 }
 
-module.exports = new StudentController(); 
+module.exports = new StudentController();

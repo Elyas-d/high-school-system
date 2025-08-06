@@ -10,7 +10,7 @@ const options = {
     },
     servers: [
       {
-        url: 'https://33ea01710551.ngrok-free.app/api',
+        url: 'https://2ba154345c6e.ngrok-free.app/api',
         description: 'Ngrok Tunnel',
       },
     ],
