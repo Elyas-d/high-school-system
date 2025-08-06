@@ -1,33 +1,22 @@
+const createError = require('http-errors');
+
 function errorHandler(err, req, res, next) {
-  console.error('Error:', err);
-
-  // Default error
-  let status = 500;
-  let message = 'Internal Server Error';
-
-  // Handle specific error types
-  if (err.name === 'ValidationError') {
-    status = 400;
-    message = err.message;
-  } else if (err.name === 'UnauthorizedError') {
-    status = 401;
-    message = 'Unauthorized';
-  } else if (err.name === 'ForbiddenError') {
-    status = 403;
-    message = 'Forbidden';
-  } else if (err.name === 'NotFoundError') {
-    status = 404;
-    message = 'Not Found';
-  } else if (err.name === 'ConflictError') {
-    status = 409;
-    message = 'Conflict';
+  // If the error is not an instance of http-errors, it's an unexpected server error.
+  // Log it and treat it as a 500 error.
+  if (!createError.isHttpError(err)) {
+    console.error(err); // Log the full error for debugging
+    err = createError(500, 'Internal Server Error');
   }
 
-  res.status(status).json({
+  res.status(err.status || 500);
+  res.json({
     success: false,
-    message: message,
-    timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    error: {
+      status: err.status,
+      message: err.message,
+      // Optionally include stack trace in development
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    },
   });
 }
 
@@ -39,4 +28,4 @@ function notFoundHandler(req, res) {
   });
 }
 
-module.exports = { errorHandler, notFoundHandler }; 
+module.exports = { errorHandler, notFoundHandler };
