@@ -5,13 +5,13 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'High School Management System API',
-      version: '1.0.0',
+      version: '1.2.0',
       description: 'API documentation for the High School Management System',
     },
     servers: [
       {
-        url: 'http://localhost:3000/api',
-        description: 'Development server',
+        url: 'https://33ea01710551.ngrok-free.app/api',
+        description: 'Ngrok Tunnel',
       },
     ],
     components: {
